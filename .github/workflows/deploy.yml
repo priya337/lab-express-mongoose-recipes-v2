@@ -1,23 +1,22 @@
-name: CI/CD Pipeline
+name: Local Ansible CI/CD
 
 on:
   push:
     branches:
       - main
+      - develop
+  workflow_dispatch:  # Allows manual triggering from GitHub
 
 jobs:
-  build:
-    runs-on: self-hosted  # Uses the self-hosted runner
-
+  deploy:
+    runs-on: self-hosted  # Ensures it runs on your local runner
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: npm install
+      - name: Print Runner Info
+        run: echo "Running on self-hosted GitHub Actions"
 
-      - name: Run tests
-        run: npm test
-
-      - name: Build application
-        run: npm run build
+      - name: Run Local Ansible Playbook
+        run: |
+          ansible-playbook -i inventory/local_inventory.yml playbooks/deploy.yml --ask-become-pass
