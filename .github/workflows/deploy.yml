@@ -1,26 +1,32 @@
-name: Local Ansible CI/CD
+name: Backend Auto Deployment
 
 on:
   push:
     branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
-  workflow_dispatch:  # Allows manual execution from GitHub UI
+      - main  # Runs when code is pushed to the main branch
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Ensures job runs on your local machine
+    runs-on: YENLO-C623RV2GDH  # Run on your self-hosted runner
+
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          repository: priya337/lab-express-mongoose-recipes-v2  # Your repo
+          path: /Users/priyasidhaiyan/Documents/Ironhack/mongoose  # Use correct local path
 
-      - name: Print Debug Info
-        run: echo "Running job on self-hosted runner"
-
-      - name: Run Local Ansible Playbook
+      - name: Create .env File
         run: |
-          ansible-playbook -i inventory/local_inventory.yml playbooks/deploy.yml --ask-become-pass
+          echo "PORT=5005" > /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
+          echo "ORIGIN=http://localhost:3000" >> /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
+
+      - name: Install Dependencies
+        run: |
+          cd /Users/priyasidhaiyan/Documents/Ironhack/mongoose
+          npm install  # Install required packages
+
+      - name: Restart Backend Server
+        run: |
+          cd /Users/priyasidhaiyan/Documents/Ironhack/mongoose
+          pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
