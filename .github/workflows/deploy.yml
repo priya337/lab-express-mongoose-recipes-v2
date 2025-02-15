@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: priya337/lab-express-mongoose-recipes-v2  # Your repo
-          path: /Users/priyasidhaiyan/Documents/Ironhack/mongoose  # Use correct local path
+          path: ab-express-mongoose-recipes-v2  # Use correct local path
 
       - name: Create .env File
         run: |
