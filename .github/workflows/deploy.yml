@@ -3,30 +3,28 @@ name: Backend Auto Deployment
 on:
   push:
     branches:
-      - main  # Runs when code is pushed to the main branch
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Run on your self-hosted runner
+    runs-on: self-hosted  # Uses the self-hosted runner
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          repository: priya337/lab-express-mongoose-recipes-v2  # Your repo
-          path: ab-express-mongoose-recipes-v2  # Use correct local path
+        uses: actions/checkout@v3  # ✅ Removes hardcoded path
 
-      - name: Create .env File
+      - name: Set Environment Variables
         run: |
-          echo "PORT=5006" > /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
-          echo "ORIGIN=http://localhost:3000" >> /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
+          echo "PORT=5006" > $GITHUB_WORKSPACE/.env
+          echo "ORIGIN=http://localhost:3000" >> $GITHUB_WORKSPACE/.env
 
       - name: Install Dependencies
         run: |
-          cd /Users/priyasidhaiyan/Documents/Ironhack/mongoose
-          npm install  # Install required packages
+          cd $GITHUB_WORKSPACE
+          npm install
 
       - name: Restart Backend Server
         run: |
-          cd /Users/priyasidhaiyan/Documents/Ironhack/mongoose
+          cd $GITHUB_WORKSPACE
           pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
