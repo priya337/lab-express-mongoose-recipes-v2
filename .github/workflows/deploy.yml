@@ -40,14 +40,21 @@ jobs:
           pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
 
       # ---------------- Alerting to Prometheus via Node Exporter ---------------- #
+
+      - name: Ensure Node Exporter Textfile Collector Directory Exists
+        run: |
+          sudo mkdir -p /var/lib/node_exporter/textfile_collector
+          sudo chmod -R 777 /var/lib/node_exporter/textfile_collector
+          sudo chown -R $(whoami) /var/lib/node_exporter/textfile_collector
+
       - name: Send deployment success metric to Node Exporter
         if: success()
         run: |
-          sudo mkdir -p /var/lib/node_exporter/textfile_collector
-          echo "ci_deployment_status 1" | sudo tee /var/lib/node_exporter/textfile_collector/deployment.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+          sudo systemctl restart node_exporter || brew services restart node_exporter
 
       - name: Send deployment failure metric to Node Exporter
         if: failure()
         run: |
-          sudo mkdir -p /var/lib/node_exporter/textfile_collector
-          echo "ci_deployment_status 0" | sudo tee /var/lib/node_exporter/textfile_collector/deployment.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+          sudo systemctl restart node_exporter || brew services restart node_exporter
