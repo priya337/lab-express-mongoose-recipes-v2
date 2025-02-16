@@ -38,3 +38,16 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
+
+      # ---------------- Alerting to Prometheus via Node Exporter ---------------- #
+      - name: Send deployment success metric to Node Exporter
+        if: success()
+        run: |
+          sudo mkdir -p /var/lib/node_exporter/textfile_collector
+          echo "ci_deployment_status 1" | sudo tee /var/lib/node_exporter/textfile_collector/deployment.prom
+
+      - name: Send deployment failure metric to Node Exporter
+        if: failure()
+        run: |
+          sudo mkdir -p /var/lib/node_exporter/textfile_collector
+          echo "ci_deployment_status 0" | sudo tee /var/lib/node_exporter/textfile_collector/deployment.prom
