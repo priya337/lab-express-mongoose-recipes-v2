@@ -25,13 +25,13 @@ jobs:
           npm install
 
       - name: Run Linter
-        continue-on-error: true
+        continue-on-error: false
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
 
       - name: Run Tests
-        continue-on-error: false
+        continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
           npm test
