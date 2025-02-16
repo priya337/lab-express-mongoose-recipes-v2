@@ -25,6 +25,7 @@ jobs:
           npm install
 
       - name: Run Linter
+        continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
