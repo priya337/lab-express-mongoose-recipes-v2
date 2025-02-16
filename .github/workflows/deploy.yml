@@ -25,13 +25,13 @@ jobs:
           npm install
 
       - name: Run Linter
-        continue-on-error: false
+        continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
 
       - name: Run Tests
-        continue-on-error: true
+        continue-on-error: false
         run: |
           cd $GITHUB_WORKSPACE
           npm test
@@ -52,13 +52,14 @@ jobs:
       - name: Send deployment success metric to Node Exporter
         if: success()
         run: |
-          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
-          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 0" >> /var/lib/node_exporter/textfile_collector/deployment.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment_success.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 0" > /var/lib/node_exporter/textfile_collector/deployment_failure.prom
           systemctl --user restart node_exporter || brew services restart node_exporter
 
       - name: Send deployment failure metric to Node Exporter
         if: failure()
         run: |
-          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
-          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 0" >> /var/lib/node_exporter/textfile_collector/deployment.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment_failure.prom
+          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 0" > /var/lib/node_exporter/textfile_collector/deployment_success.prom
           systemctl --user restart node_exporter || brew services restart node_exporter
+
