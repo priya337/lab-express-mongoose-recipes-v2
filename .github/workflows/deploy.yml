@@ -20,7 +20,7 @@ jobs:
           echo "ORIGIN=http://localhost:3000" >> $GITHUB_WORKSPACE/.env
 
       - name: Run Linter
-        continue-on-error: true  # Fails the job if linting fails
+        continue-on-error: false  # Fails the job if linting fails
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
