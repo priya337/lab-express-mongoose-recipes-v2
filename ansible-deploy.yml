@@ -24,7 +24,7 @@
       args:
         chdir: "{{ deploy_path }}"
       register: test_result
-      ignore_errors: no
+      ignore_errors: yes
 
     - name: Handle Test Failures
       when: test_result.rc != 0
