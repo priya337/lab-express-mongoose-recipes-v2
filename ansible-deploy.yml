@@ -17,7 +17,7 @@
       command: npm run lint
       args:
         chdir: "{{ deploy_path }}"
-      failed_when: false  # Stop playbook if linting fails
+      failed_when: true  # Stop playbook if linting fails
 
     - name: Run Tests
       command: npm test
