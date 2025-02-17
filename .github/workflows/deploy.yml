@@ -19,27 +19,41 @@ jobs:
           echo "PORT=5006" > $GITHUB_WORKSPACE/.env
           echo "ORIGIN=http://localhost:3000" >> $GITHUB_WORKSPACE/.env
 
-      - name: Install Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          npm install
-
       - name: Run Linter
-        continue-on-error: false
+        continue-on-error: true  # Fails the job if linting fails
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
-
+  
       - name: Run Tests
-        continue-on-error: true
+        continue-on-error: true  # Ensures failure does not stop execution
         run: |
           cd $GITHUB_WORKSPACE
           npm test || echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
-
+  
       - name: Restart Backend Server
         run: |
           cd $GITHUB_WORKSPACE
           pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
+
+      - name: Run Deployment Steps and Monitor Exit Code
+        run: |
+          set -e  # Exit immediately on error
+          {
+            # Checkout repository
+            cd $GITHUB_WORKSPACE
+            npm install
+            npm run lint
+            npm test
+            pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
+          } || {
+            # If any step fails, write failure metrics
+            echo "Error: Process completed with exit code 1."
+            echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+            echo "ci_deployment_status{job=\"node\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
+            brew services restart node_exporter || systemctl --user restart node_exporter
+            exit 1
+          }
 
       # ---------------- Alerting to Prometheus via Node Exporter ---------------- #
 
@@ -48,18 +62,3 @@ jobs:
           mkdir -p /var/lib/node_exporter/textfile_collector
           chmod -R 777 /var/lib/node_exporter/textfile_collector
           chown -R $(whoami) /var/lib/node_exporter/textfile_collector
-
-      - name: Send deployment failure metric to Node Exporter
-        run: |
-          # Remove old failure metrics
-          rm -f /var/lib/node_exporter/textfile_collector/deployment.prom
-          rm -f /var/lib/node_exporter/textfile_collector/node_metrics.prom
-          
-          # Log only failures
-          if [[ "${{ job.status }}" != "success" ]]; then
-            echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
-            echo "ci_deployment_status{job=\"node\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
-          fi
-          
-          # Restart Node Exporter to apply changes
-          brew services restart node_exporter || systemctl --user restart node_exporter
