@@ -17,7 +17,7 @@
       command: npm run lint
       args:
         chdir: "{{ deploy_path }}"
-      failed_when: false # Stop playbook if linting fails
+      failed_when: false  # Stop playbook if linting fails
 
     - name: Run Tests
       command: npm test
@@ -29,12 +29,10 @@
     - name: Handle Test Failures
       when: test_result.rc != 0
       block:
-        - name: Log Failure Directly in Prometheus Format
-          lineinfile:
-            path: "/var/lib/node_exporter/textfile_collector/deployment.prom"
-            create: yes
-            line: 'ci_deployment_status{job="ansible", status="failure"} 1'
-            mode: '0644'
+        - name: Log Failure in Node Exporter
+          copy:
+            dest: "/var/lib/node_exporter/textfile_collector/deployment.prom"
+            content: 'ci_deployment_status{job="ansible", status="failure"} 1'
 
     - name: Restart Backend Server with PM2
       shell: |
