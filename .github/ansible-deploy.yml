@@ -1,0 +1,40 @@
+---
+- name: Backend Auto Deployment (Local via Ansible)
+  hosts: localhost
+  become: no  # No sudo needed
+
+  tasks:
+    - name: Set Deployment Path
+      set_fact:
+        deploy_path: "/Users/priyasidhaiyan/Documents/Ironhack/mongoose"
+
+    - name: Install Dependencies
+      command: npm install
+      args:
+        chdir: "{{ deploy_path }}"
+
+    - name: Run Linter
+      command: npm run lint
+      args:
+        chdir: "{{ deploy_path }}"
+      ignore_errors: no  # Stop playbook if linting fails
+
+    - name: Run Tests
+      command: npm test
+      args:
+        chdir: "{{ deploy_path }}"
+      register: test_result
+      ignore_errors: yes
+
+    - name: Handle Test Failures
+      when: test_result.rc != 0
+      block:
+        - name: Log Failure in Node Exporter
+          copy:
+            dest: "/var/lib/node_exporter/textfile_collector/deployment.prom"
+            content: 'ci_deployment_status{job="ansible", status="failure"} 1'
+
+    - name: Restart Backend Server
+      command: pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
+      args:
+        chdir: "{{ deploy_path }}"
