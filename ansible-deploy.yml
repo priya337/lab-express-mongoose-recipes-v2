@@ -13,26 +13,26 @@
       args:
         chdir: "{{ deploy_path }}"
 
-    # - name: Run Linter
-    #   command: npm run lint
-    #   args:
-    #     chdir: "{{ deploy_path }}"
-    #   ignore_errors: yes  # Stop playbook if linting fails
+    - name: Run Linter
+      command: npm run lint
+      args:
+        chdir: "{{ deploy_path }}"
+      failed_when: false  # Stop playbook if linting fails
 
-    # - name: Run Tests
-    #   command: npm test
-    #   args:
-    #     chdir: "{{ deploy_path }}"
-    #   register: test_result
-    #   ignore_errors: yes
+    - name: Run Tests
+      command: npm test
+      args:
+        chdir: "{{ deploy_path }}"
+      register: test_result
+      failed_when: false
 
-   # - name: Handle Test Failures
-    #  when: test_result.rc != 0
-    #  block:
-    #    - name: Log Failure in Node Exporter
-    #     copy:
-    #        dest: "/var/lib/node_exporter/textfile_collector/deployment.prom"
-    #        content: 'ci_deployment_status{job="ansible", status="failure"} 1'
+    - name: Handle Test Failures
+      when: test_result.rc != 0
+      block:
+        - name: Log Failure in Node Exporter
+          copy:
+            dest: "/var/lib/node_exporter/textfile_collector/deployment.prom"
+            content: 'ci_deployment_status{job="ansible", status="failure"} 1'
 
     - name: Restart Backend Server
       command: pm2 restart mongoose-server || pm2 start server.js --name mongoose-server --watch
