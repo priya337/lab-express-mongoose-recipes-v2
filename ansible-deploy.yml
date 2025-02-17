@@ -26,15 +26,14 @@
       register: test_result
       failed_when: false
 
-- name: Handle Test Failures
-  when: test_result.rc != 0
-  block:
-    - name: Log Failure Directly in Prometheus Format
-      lineinfile:
-        path: "/opt/homebrew/prometheus/deployment.prom"
-        create: yes
-        line: 'ci_deployment_status{job="ansible", status="failure"} 1'
-
+    - name: Handle Test Failures
+      when: test_result.rc != 0
+      block:
+        - name: Log Failure Directly in Prometheus Format
+          lineinfile:
+            path: "/var/lib/node_exporter/textfile_collector/deployment.prom"
+            create: yes
+            content: 'ci_deployment_status{job="ansible", status="failure"} 1'
 
     - name: Restart Backend Server with PM2
       shell: |
