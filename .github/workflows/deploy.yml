@@ -26,7 +26,7 @@ jobs:
           npm run lint
   
       - name: Run Tests
-        continue-on-error: true  # Ensures failure does not stop execution
+        continue-on-error: false # Ensures failure does not stop execution
         run: |
           cd $GITHUB_WORKSPACE
           npm test || echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
