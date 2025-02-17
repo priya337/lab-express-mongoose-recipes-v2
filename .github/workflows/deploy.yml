@@ -16,7 +16,7 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          echo "PORT=5006" > /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
+          echo "PORT=5007" > /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
           echo "ORIGIN=http://localhost:3000" >> /Users/priyasidhaiyan/Documents/Ironhack/mongoose/.env
 
       # ---------------- Ansible Deployment Step ---------------- #
