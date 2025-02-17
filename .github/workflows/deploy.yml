@@ -53,8 +53,9 @@ jobs:
         run: |
           if [[ "${{ job.status }}" == "success" ]]; then
             echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+            echo "ci_deployment_status{job=\"node\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
           else
             echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+            echo "ci_deployment_status{job=\"node\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
           fi
-          echo "ci_deployment_status{job=\"node\", status=\"${{ job.status }}\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
           brew services restart node_exporter || systemctl --user restart node_exporter
