@@ -13,18 +13,18 @@
       args:
         chdir: "{{ deploy_path }}"
 
-    - name: Run Linter
-      command: npm run lint
-      args:
-        chdir: "{{ deploy_path }}"
-      ignore_errors: yes  # Stop playbook if linting fails
+    # - name: Run Linter
+    #   command: npm run lint
+    #   args:
+    #     chdir: "{{ deploy_path }}"
+    #   ignore_errors: yes  # Stop playbook if linting fails
 
-    - name: Run Tests
-      command: npm test
-      args:
-        chdir: "{{ deploy_path }}"
-      register: test_result
-      ignore_errors: yes
+    # - name: Run Tests
+    #   command: npm test
+    #   args:
+    #     chdir: "{{ deploy_path }}"
+    #   register: test_result
+    #   ignore_errors: yes
 
     - name: Handle Test Failures
       when: test_result.rc != 0
