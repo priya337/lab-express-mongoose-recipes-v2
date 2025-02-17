@@ -49,17 +49,11 @@ jobs:
           chmod -R 777 /var/lib/node_exporter/textfile_collector
           chown -R $(whoami) /var/lib/node_exporter/textfile_collector
 
-      - name: Send deployment success metric to Node Exporter
-        if: success()
+      - name: Send deployment status metric to Node Exporter
         run: |
-          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment_success.prom
-          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 0" > /var/lib/node_exporter/textfile_collector/deployment_failure.prom
-          systemctl --user restart node_exporter || brew services restart node_exporter
-
-      - name: Send deployment failure metric to Node Exporter
-        if: failure()
-        run: |
-          echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment_failure.prom
-          echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 0" > /var/lib/node_exporter/textfile_collector/deployment_success.prom
-          systemctl --user restart node_exporter || brew services restart node_exporter
-
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "ci_deployment_status{job=\"github_actions\", status=\"success\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+          else
+            echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
+          fi
+          brew services restart node_exporter || systemctl --user restart node_exporter
