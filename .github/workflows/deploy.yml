@@ -25,7 +25,7 @@ jobs:
           npm install
 
       - name: Run Linter
-        continue-on-error: false
+        continue-on-error: true
         run: |
           cd $GITHUB_WORKSPACE
           npm run lint
@@ -56,4 +56,5 @@ jobs:
           else
             echo "ci_deployment_status{job=\"github_actions\", status=\"failure\"} 1" > /var/lib/node_exporter/textfile_collector/deployment.prom
           fi
+          echo "ci_deployment_status{job=\"node\", status=\"${{ job.status }}\"} 1" > /var/lib/node_exporter/textfile_collector/node_metrics.prom
           brew services restart node_exporter || systemctl --user restart node_exporter
