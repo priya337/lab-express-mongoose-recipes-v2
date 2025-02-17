@@ -25,9 +25,4 @@ jobs:
           ansible-playbook -i localhost, ansible-deploy.yml --connection=local
         working-directory: /Users/priyasidhaiyan/Documents/Ironhack/mongoose
 
-      # ---------------- Alerting to Prometheus via Node Exporter ---------------- #
-      - name: Ensure Node Exporter Textfile Collector Directory Exists
-        run: |
-          mkdir -p /var/lib/node_exporter/textfile_collector
-          chmod -R 777 /var/lib/node_exporter/textfile_collector
-          chown -R $(whoami) /var/lib/node_exporter/textfile_collector
+
