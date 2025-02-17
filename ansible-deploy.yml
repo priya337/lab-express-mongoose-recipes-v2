@@ -33,7 +33,8 @@
           lineinfile:
             path: "/var/lib/node_exporter/textfile_collector/deployment.prom"
             create: yes
-            content: 'ci_deployment_status{job="ansible", status="failure"} 1'
+            line: 'ci_deployment_status{job="ansible", status="failure"} 1'
+            mode: '0644'
 
     - name: Restart Backend Server with PM2
       shell: |
